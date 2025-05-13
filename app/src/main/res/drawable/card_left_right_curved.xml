@@ -8,35 +8,34 @@
             <corners android:radius="0dp" />
         </shape>
     </item>
-    
-    
+
+
     <item
-        android:bottom="5dp"
-        android:left="1dp"
-        android:right="1dp"
+        android:bottom="0dp"
+        android:left="0dp"
+        android:right="0dp"
         android:top="0dp">
-        
-        
+
+
         <shape android:shape="rectangle" >
             <solid
-                android:color="@color/btn_secondary"
+                android:color="#7767B9EB"
                 />
             <corners
-                android:bottomLeftRadius="20dip"
-                android:bottomRightRadius="20dip"
-                android:topRightRadius="0dip"
+                android:topRightRadius="@dimen/_20sdp"
+                android:topLeftRadius="@dimen/_20sdp"
                 />
 
 
         </shape>
-        
+
         <shape android:shape="rectangle"  >
-             <corners android:radius="0dip" />
-             <stroke android:width="0dip" 
-                 android:color="#10000000" />
-         </shape>
-                 
-                     
+            <corners android:radius="0dip" />
+<!--            <stroke android:width="0dip"-->
+<!--                android:color="#10000000" />-->
+        </shape>
+
+
     </item>
 
 </layer-list>

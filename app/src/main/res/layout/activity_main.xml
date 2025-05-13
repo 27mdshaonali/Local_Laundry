@@ -12,7 +12,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/colorSurface"
-        android:padding="@dimen/_10sdp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -22,39 +21,91 @@
             android:id="@+id/welcomeLogIn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_30sdp"
             android:gravity="center"
             android:text="Welcome to "
             android:textColor="@color/textPrimary"
             android:textSize="@dimen/_18sdp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            android:visibility="gone"/>
 
-
-        <androidx.appcompat.widget.AppCompatEditText
-            android:id="@+id/logInUserName"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="enter user name"
-            android:textSize="@dimen/_17ssp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/welcomeLogIn"
-            />
+            app:layout_constraintTop_toTopOf="parent"
+            >
 
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/logInButton"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/_30sdp"
-            android:background="@color/btn_secondary"
-            android:text="Log In"
-            android:textColor="@color/colorButtonText"
-            android:textSize="@dimen/_16ssp"
+            android:layout_height="0dp"
+            android:paddingStart="@dimen/_10sdp"
+            android:paddingEnd="@dimen/_10sdp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/logInUserName" />
+            app:layout_constraintTop_toBottomOf="@id/welcomeLogIn">
+
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/logInUserEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_50sdp"
+                android:background="@drawable/two_color_curved"
+                android:drawableStart="@drawable/username"
+                android:gravity="start"
+                android:hint="  enter user name"
+                android:padding="@dimen/_6sdp"
+                android:textColorHint="@color/textSecondary"
+                android:textSize="@dimen/_17ssp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/logInUserPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_20sdp"
+                android:background="@drawable/two_color_curved"
+                android:drawableStart="@drawable/username"
+                android:gravity="start"
+                android:hint="  enter user name"
+                android:padding="@dimen/_6sdp"
+                android:textColorHint="@color/textSecondary"
+                android:textSize="@dimen/_17ssp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/logInUserEmail" />
+
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/logInButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_30sdp"
+                android:background="@drawable/orange_button"
+                android:text="Log In"
+                android:textColor="@color/btn_text"
+                android:textSize="@dimen/_16ssp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/logInUserPassword" />
+
+
+
+
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </ScrollView>
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
