@@ -10,6 +10,7 @@
 
     <!-- Backgrounds -->
     <color name="colorBackground">#121212</color> <!-- Main dark background -->
+    <color name="appImageColorBackground">#262626</color> <!-- Main dark background -->
     <color name="colorSurface">#1E1E1E</color> <!-- Cards or dialogs -->
 
     <!-- Text -->

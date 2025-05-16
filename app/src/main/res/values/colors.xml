@@ -10,6 +10,7 @@
 
     <!-- Backgrounds -->
     <color name="colorBackground">#F5F5F5</color> <!-- Main app background -->
+    <color name="appImageColorBackground">#FAFAFA</color> <!-- Main app background -->
     <color name="colorSurface">#FFFFFF</color> <!-- Card or input background -->
 
     <!-- Text -->
