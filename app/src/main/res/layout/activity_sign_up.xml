@@ -9,7 +9,6 @@
     tools:context=".SignUpActivity">
 
 
-
     <!-- Main content container with surface color -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -30,17 +29,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.10" />
+            app:layout_constraintGuide_percent="0.06" />
 
 
         <!-- App logo/image -->
         <com.makeramen.roundedimageview.RoundedImageView
             android:id="@+id/appImage"
-            android:layout_width="@dimen/_70sdp"
-            android:layout_height="@dimen/_70sdp"
+            android:layout_width="@dimen/_60sdp"
+            android:layout_height="@dimen/_60sdp"
             android:layout_marginTop="@dimen/_5sdp"
             android:background="@color/appImageColorBackground"
-            android:padding="@dimen/_8sdp"
+            android:padding="@dimen/_6sdp"
             android:scaleType="centerCrop"
             android:src="@drawable/laundry"
             app:layout_constraintEnd_toEndOf="parent"
@@ -54,11 +53,11 @@
             android:id="@+id/appName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/_6sdp"
+            android:layout_marginTop="@dimen/_4sdp"
             android:gravity="center"
             android:text="@string/app_name"
             android:textColor="@color/btn_secondary"
-            android:textSize="@dimen/_18sdp"
+            android:textSize="@dimen/_17sdp"
             android:textStyle="bold"
             android:visibility="visible"
             app:layout_constraintBottom_toTopOf="@id/spaceBetweenImageAndScroll"
@@ -77,7 +76,7 @@
             android:visibility="invisible"
             app:layout_constraintBottom_toTopOf="@id/scrollView"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHeight_percent="0.05"
+            app:layout_constraintHeight_percent="0.04"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/appName" />
 
@@ -104,20 +103,45 @@
 
 
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/emailInputLayout"
+                    android:id="@+id/fullNameInputLayout"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/_10sdp"
                     app:boxBackgroundMode="outline"
-                    app:boxStrokeColor="#2196F3"
+                    app:boxStrokeColor="@color/btn_secondary"
                     app:hintEnabled="true"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
+                    app:startIconDrawable="@drawable/name2">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/userSignUpFullName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:drawableStart="@drawable/name2"
+                        android:drawablePadding="@dimen/_4sdp"
+                        android:hint="Full Name"
+                        android:inputType="textEmailAddress"
+                        android:textColor="@color/textPrimary"
+                        android:textColorHint="@color/text_shadow" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/enterEmailInputLayout"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    app:boxBackgroundMode="outline"
+                    app:boxStrokeColor="@color/btn_secondary"
+                    app:hintEnabled="true"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/fullNameInputLayout"
                     app:startIconDrawable="@drawable/mail">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/userSignInEmail"
+                        android:id="@+id/userSignUpEmail"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:drawableStart="@drawable/mail"
@@ -129,24 +153,24 @@
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/passwordInputLayout"
+                    android:id="@+id/enterPasswordInputLayout"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/_10sdp"
                     app:boxBackgroundMode="outline"
-                    app:boxStrokeColor="#2196F3"
+                    app:boxStrokeColor="@color/btn_secondary"
                     app:endIconMode="password_toggle"
                     app:hintEnabled="true"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/emailInputLayout"
-                    app:startIconDrawable="@drawable/password">
+                    app:layout_constraintTop_toBottomOf="@id/enterEmailInputLayout"
+                    app:startIconDrawable="@drawable/password_signup">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/userSignInPassword"
+                        android:id="@+id/userSignUpEnterPassword"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:drawableStart="@drawable/password"
+                        android:drawableStart="@drawable/password_signup"
                         android:drawablePadding="@dimen/_4sdp"
                         android:hint="Password"
                         android:inputType="textPassword"
@@ -155,66 +179,64 @@
                 </com.google.android.material.textfield.TextInputLayout>
 
 
-                <androidx.appcompat.widget.AppCompatCheckBox
-                    android:id="@+id/checkBox"
-                    android:layout_width="wrap_content"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/reenterPasswordInputLayout"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/_16sdp"
-                    android:text="Remember Me"
-                    android:textSize="@dimen/_12ssp"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/passwordInputLayout" />
-
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/forgotPassword"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="@dimen/_10sdp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?attr/selectableItemBackground"
-                    android:paddingStart="@dimen/_3sdp"
-                    android:paddingTop="@dimen/_3sdp"
-                    android:paddingBottom="@dimen/_3sdp"
-                    android:text="Forgot password?"
-                    android:textColor="@color/btn_secondary"
-                    android:textSize="@dimen/_12ssp"
-                    app:layout_constraintBottom_toBottomOf="@id/checkBox"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    app:boxBackgroundMode="outline"
+                    app:boxStrokeColor="@color/btn_secondary"
+                    app:endIconMode="password_toggle"
+                    app:hintEnabled="true"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/checkBox" />
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/enterPasswordInputLayout"
+                    app:startIconDrawable="@drawable/password_signup">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/userSignUpReenterPassword"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:drawableStart="@drawable/password_signup"
+                        android:drawablePadding="@dimen/_4sdp"
+                        android:hint="Re - Password"
+                        android:inputType="textPassword"
+                        android:textColor="@color/textPrimary"
+                        android:textColorHint="@color/text_shadow" />
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- Sign in button -->
                 <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/signInButton"
+                    android:id="@+id/signUpButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/_24sdp"
+                    android:layout_marginTop="@dimen/_35sdp"
                     android:background="@drawable/orange_button"
-                    android:text="Sign in"
+                    android:text="Sign up"
                     android:textAllCaps="false"
                     android:textColor="@color/btn_text"
                     android:textSize="@dimen/_15ssp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/checkBox" />
+                    app:layout_constraintTop_toBottomOf="@id/reenterPasswordInputLayout" />
 
                 <!-- Social login divider -->
                 <View
                     android:id="@+id/viewStart"
                     android:layout_width="0dp"
                     android:layout_height="@dimen/_1sdp"
-                    android:layout_marginTop="@dimen/_24sdp"
+                    android:layout_marginTop="@dimen/_35sdp"
                     android:background="@color/textSecondary"
                     app:layout_constraintEnd_toStartOf="@id/loginWith"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/signInButton" />
+                    app:layout_constraintTop_toBottomOf="@id/signUpButton" />
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/loginWith"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/_8sdp"
-                    android:text="Sign in with"
+                    android:text="Sign up with"
                     android:textColor="@color/textSecondary"
                     android:textSize="@dimen/_16ssp"
                     app:layout_constraintBottom_toBottomOf="@id/viewStart"
@@ -233,16 +255,18 @@
 
                 <!-- Social login buttons -->
                 <com.makeramen.roundedimageview.RoundedImageView
-                    android:id="@+id/logInWithFB"
+                    android:id="@+id/signUpWithFB"
                     android:layout_width="@dimen/_42sdp"
                     android:layout_height="@dimen/_42sdp"
                     android:layout_marginStart="@dimen/_20sdp"
-                    android:layout_marginTop="@dimen/_16sdp"
+                    android:layout_marginTop="@dimen/_25sdp"
                     android:background="@color/appImageColorBackground"
                     android:elevation="@dimen/_6sdp"
-                    android:padding="@dimen/_8sdp"
+                    android:padding="@dimen/_6sdp"
                     android:scaleType="centerCrop"
+                    app:layout_goneMarginStart="@dimen/_20sdp"
                     android:src="@drawable/facebook"
+                    app:layout_constraintEnd_toStartOf="@id/signUpWithX"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/loginWith"
                     app:riv_corner_radius="@dimen/_50sdp"
@@ -251,7 +275,7 @@
 
 
                 <com.makeramen.roundedimageview.RoundedImageView
-                    android:id="@+id/logInWithX"
+                    android:id="@+id/signUpWithX"
                     android:layout_width="@dimen/_42sdp"
                     android:layout_height="@dimen/_42sdp"
                     android:background="@color/appImageColorBackground"
@@ -259,15 +283,15 @@
                     android:padding="@dimen/_6sdp"
                     android:scaleType="centerCrop"
                     android:src="@drawable/x"
-                    app:layout_constraintBottom_toBottomOf="@id/logInWithFB"
-                    app:layout_constraintEnd_toStartOf="@id/logInWithGoogle"
-                    app:layout_constraintStart_toEndOf="@id/logInWithFB"
-                    app:layout_constraintTop_toTopOf="@id/logInWithFB"
+                    app:layout_constraintBottom_toBottomOf="@id/signUpWithFB"
+                    app:layout_constraintEnd_toStartOf="@id/signUpWithGoogle"
+                    app:layout_constraintStart_toEndOf="@id/signUpWithFB"
+                    app:layout_constraintTop_toTopOf="@id/signUpWithFB"
                     app:riv_corner_radius="@dimen/_50sdp"
                     app:riv_mutate_background="true" />
 
                 <com.makeramen.roundedimageview.RoundedImageView
-                    android:id="@+id/logInWithGoogle"
+                    android:id="@+id/signUpWithGoogle"
                     android:layout_width="@dimen/_42sdp"
                     android:layout_height="@dimen/_42sdp"
                     android:background="@color/appImageColorBackground"
@@ -275,15 +299,15 @@
                     android:padding="@dimen/_7sdp"
                     android:scaleType="centerCrop"
                     android:src="@drawable/google"
-                    app:layout_constraintBottom_toBottomOf="@id/logInWithFB"
-                    app:layout_constraintEnd_toStartOf="@id/logInWithGithub"
-                    app:layout_constraintStart_toEndOf="@id/logInWithX"
-                    app:layout_constraintTop_toTopOf="@id/logInWithFB"
+                    app:layout_constraintBottom_toBottomOf="@id/signUpWithX"
+                    app:layout_constraintEnd_toStartOf="@id/signUpWithGithub"
+                    app:layout_constraintStart_toEndOf="@id/signUpWithX"
+                    app:layout_constraintTop_toTopOf="@id/signUpWithX"
                     app:riv_corner_radius="@dimen/_50sdp"
                     app:riv_mutate_background="true" />
 
                 <com.makeramen.roundedimageview.RoundedImageView
-                    android:id="@+id/logInWithGithub"
+                    android:id="@+id/signUpWithGithub"
                     android:layout_width="@dimen/_42sdp"
                     android:layout_height="@dimen/_42sdp"
                     android:layout_marginEnd="@dimen/_20sdp"
@@ -292,10 +316,10 @@
                     android:padding="@dimen/_6sdp"
                     android:scaleType="centerCrop"
                     android:src="@drawable/github"
-                    app:layout_constraintBottom_toBottomOf="@id/logInWithFB"
+                    app:layout_constraintBottom_toBottomOf="@id/signUpWithGoogle"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/logInWithGoogle"
-                    app:layout_constraintTop_toTopOf="@id/logInWithFB"
+                    app:layout_constraintStart_toEndOf="@id/signUpWithGoogle"
+                    app:layout_constraintTop_toTopOf="@id/signUpWithGoogle"
                     app:riv_corner_radius="@dimen/_50sdp"
                     app:riv_mutate_background="true" />
 
@@ -304,20 +328,20 @@
 
                 <!-- Sign up prompt -->
                 <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/notAccount"
+                    android:id="@+id/haveAccount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/_24sdp"
-                    android:text="Don't have an account?"
+                    android:text="Already have an account ?"
                     android:textColor="@color/textSecondary"
                     android:textSize="@dimen/_13ssp"
-                    app:layout_constraintEnd_toStartOf="@id/signUp"
+                    app:layout_constraintEnd_toStartOf="@id/signIn"
                     app:layout_constraintHorizontal_chainStyle="packed"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/logInWithFB" />
+                    app:layout_constraintTop_toBottomOf="@id/signUpWithFB" />
 
                 <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/signUp"
+                    android:id="@+id/signIn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/_4sdp"
@@ -325,13 +349,13 @@
                     android:focusable="true"
                     android:foreground="?attr/selectableItemBackground"
                     android:padding="@dimen/_3sdp"
-                    android:text="Sign up"
+                    android:text="Sign in"
                     android:textColor="@color/btn_secondary"
                     android:textSize="@dimen/_14ssp"
-                    app:layout_constraintBottom_toBottomOf="@id/notAccount"
+                    app:layout_constraintBottom_toBottomOf="@id/haveAccount"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/notAccount"
-                    app:layout_constraintTop_toTopOf="@id/notAccount" />
+                    app:layout_constraintStart_toEndOf="@id/haveAccount"
+                    app:layout_constraintTop_toTopOf="@id/haveAccount" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </ScrollView>
     </androidx.constraintlayout.widget.ConstraintLayout>
