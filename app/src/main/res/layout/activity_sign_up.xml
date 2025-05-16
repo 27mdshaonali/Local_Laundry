@@ -6,7 +6,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorBackground"
-    tools:context=".MainActivity">
+    tools:context=".SignUpActivity">
+
+
 
     <!-- Main content container with surface color -->
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -107,7 +109,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/_10sdp"
                     app:boxBackgroundMode="outline"
-                    app:boxStrokeColor="@color/btn_secondary"
+                    app:boxStrokeColor="#2196F3"
                     app:hintEnabled="true"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
