@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -13,6 +14,7 @@ import androidx.core.view.WindowInsetsCompat;
 public class MainActivity extends AppCompatActivity {
 
     AppCompatTextView signUp;
+    AppCompatButton signInButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,12 +28,14 @@ public class MainActivity extends AppCompatActivity {
         });
 
         initializeView();
+        signInButton.setOnClickListener(v -> setLogin());
         signUp.setOnClickListener(v -> setSignUp());
 
     }
 
     public void initializeView() {
 
+        signInButton = findViewById(R.id.signInButton);
         signUp = findViewById(R.id.signUp);
 
     }
@@ -39,6 +43,13 @@ public class MainActivity extends AppCompatActivity {
     public void setSignUp() {
 
         startActivity(new Intent(this, SignUpActivity.class));
+
+    }
+
+    public void setLogin() {
+
+        startActivity(new Intent(this, UserDashboard.class));
+
 
     }
 

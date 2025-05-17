@@ -77,4 +77,5 @@ dependencies {
     implementation libs.firebase.firestore
 
     implementation("com.google.firebase:firebase-inappmessaging-display")
+    implementation("com.google.firebase:firebase-messaging")
 }
