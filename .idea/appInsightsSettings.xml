@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.binarybirds.locallaundry" />
+                  <option name="mobileSdkAppId" value="1:671302275190:android:9ecc1cbf4168bd96574f57" />
+                  <option name="projectId" value="local-laundry1" />
+                  <option name="projectNumber" value="671302275190" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

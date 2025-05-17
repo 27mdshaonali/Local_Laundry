@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "671302275190",
+    "project_id": "local-laundry1",
+    "storage_bucket": "local-laundry1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:671302275190:android:9ecc1cbf4168bd96574f57",
+        "android_client_info": {
+          "package_name": "com.binarybirds.locallaundry"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAQ9G12LboG7SnzCBqJEMJJjbA_vrGDOHM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
