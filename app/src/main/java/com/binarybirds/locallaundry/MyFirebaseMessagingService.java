@@ -9,6 +9,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
@@ -31,11 +32,23 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
             sendNotification(notificationTitle, notificationMessage);
 
+        } else {
+
+            String notificationMessage = remoteMessage.getData().get("message");
+            String notificationTitle = remoteMessage.getData().get("title");
+            sendNotification(notificationTitle, notificationMessage);
+
         }
 
 
     }
 
+
+    @Override
+    public void onNewToken(@NonNull String token) {
+        super.onNewToken(token);
+        // I can send the token to my server here to control the device from my server
+    }
 
     private void sendNotification(String messageBody, String title) {
         Intent intent = new Intent(this, UserDashboard.class);

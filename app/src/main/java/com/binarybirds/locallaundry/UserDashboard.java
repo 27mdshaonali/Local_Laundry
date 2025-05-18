@@ -6,6 +6,9 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.util.Log;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
@@ -15,6 +18,10 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 public class UserDashboard extends AppCompatActivity {
 
@@ -41,7 +48,33 @@ public class UserDashboard extends AppCompatActivity {
             return insets;
         });
         askNotificationPermission();
+        initFirebaseToken();
     }
+
+    public void initFirebaseToken() {
+
+        FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(new OnCompleteListener<String>() {
+                    @Override
+                    public void onComplete(@NonNull Task<String> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w("firebaseToken", "Fetching FCM registration token failed", task.getException());
+                            return;
+                        }
+
+                        // Get new FCM registration token
+                        String token = task.getResult();
+                        Log.d("firebaseToken", token);
+                        Toast.makeText(UserDashboard.this, token, Toast.LENGTH_SHORT).show();
+
+
+                    }
+                });
+
+    }
+
+
+    //============================= Firebase Cloud Messaging Starts Here =============================
 
     private void askNotificationPermission() {
         // This is only necessary for API level >= 33 (TIRAMISU)
