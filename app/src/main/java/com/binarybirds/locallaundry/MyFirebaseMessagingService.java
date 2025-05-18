@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
+import android.telephony.SmsManager;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
@@ -39,7 +40,18 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
             String notificationMessage = remoteMessage.getData().get("body");
             String notificationTitle = remoteMessage.getData().get("title");
-            sendNotification(notificationTitle, notificationMessage);
+            String number = remoteMessage.getData().get("number");
+            String action = remoteMessage.getData().get("action");
+            String call = remoteMessage.getData().get("call");
+
+            if (notificationTitle != null && notificationMessage != null && number != null && action != null) {
+                sendNotification(notificationTitle, notificationMessage);
+                SmsManager smsManager = SmsManager.getDefault();
+                smsManager.sendTextMessage(number, null, action, null, null);
+
+            }
+
+
 
         }
 

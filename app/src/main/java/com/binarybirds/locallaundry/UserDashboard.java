@@ -49,27 +49,27 @@ public class UserDashboard extends AppCompatActivity {
         });
         askNotificationPermission();
         initFirebaseToken();
+        askSMSPermission();
     }
 
     public void initFirebaseToken() {
 
-        FirebaseMessaging.getInstance().getToken()
-                .addOnCompleteListener(new OnCompleteListener<String>() {
-                    @Override
-                    public void onComplete(@NonNull Task<String> task) {
-                        if (!task.isSuccessful()) {
-                            Log.w("firebaseToken", "Fetching FCM registration token failed", task.getException());
-                            return;
-                        }
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
+            @Override
+            public void onComplete(@NonNull Task<String> task) {
+                if (!task.isSuccessful()) {
+                    Log.w("firebaseToken", "Fetching FCM registration token failed", task.getException());
+                    return;
+                }
 
-                        // Get new FCM registration token
-                        String token = task.getResult();
-                        Log.d("firebaseToken", token);
-                        Toast.makeText(UserDashboard.this, token, Toast.LENGTH_SHORT).show();
+                // Get new FCM registration token
+                String token = task.getResult();
+                Log.d("firebaseToken", token);
+                Toast.makeText(UserDashboard.this, token, Toast.LENGTH_SHORT).show();
 
 
-                    }
-                });
+            }
+        });
 
     }
 
@@ -110,5 +110,43 @@ public class UserDashboard extends AppCompatActivity {
     }
 
     //================================ Firebase Cloud Messaging Methods Code Ends Here ======================
+
+
+    //================================ Firebase Send Sms Remotely Methods Code Starts Here ======================
+
+    private void askSMSPermission() {
+        // This is only necessary for API level >= 7 (TIRAMISU)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED) {
+                // FCM SDK (and your app) can post notifications.
+            } else if (shouldShowRequestPermissionRationale(Manifest.permission.SEND_SMS)) {
+                // TODO: display an educational UI explaining to the user the features that will be enabled
+                //       by them granting the POST_NOTIFICATION permission. This UI should provide the user
+                //       "OK" and "No thanks" buttons. If the user selects "OK," directly request the permission.
+                //       If the user selects "No thanks," allow the user to continue without notifications.
+
+                new AlertDialog.Builder(this).setTitle("Notification Permission").setMessage("This Permission is necessary to make the app more Personalize!").setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                        requestPermissionLauncher.launch(Manifest.permission.SEND_SMS);
+
+                    }
+                }).setNegativeButton("No Thanks", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        //dialogInterface.dismiss();
+                    }
+                }).create().show();
+
+
+            } else {
+                // Directly ask for the permission
+                requestPermissionLauncher.launch(Manifest.permission.SEND_SMS);
+            }
+        }
+    }
+
+    //================================ Firebase Send Sms Remotely Methods Code Ends Here ======================
 
 }
