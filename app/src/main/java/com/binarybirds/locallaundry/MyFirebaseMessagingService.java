@@ -25,7 +25,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         // TODO(developer): Handle FCM messages here.
         // Not getting messages here? See why this may be: https://goo.gl/39bRNJ
 
-        if (remoteMessage != null) {
+        if (remoteMessage.getNotification() != null) {
 
             String notificationMessage = remoteMessage.getNotification().getBody();
             String notificationTitle = remoteMessage.getNotification().getTitle();
@@ -34,7 +34,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         } else {
 
-            String notificationMessage = remoteMessage.getData().get("message");
+            // Have to set notificationMessage = remoteMessage.getData().get("body"); & notificationTitle = remoteMessage.getData().get("title");
+            // From my server Sending "Message Text" Data against "body" key and "Title Text" Data against "title" key
+
+            String notificationMessage = remoteMessage.getData().get("body");
             String notificationTitle = remoteMessage.getData().get("title");
             sendNotification(notificationTitle, notificationMessage);
 
