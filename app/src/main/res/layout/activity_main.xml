@@ -119,7 +119,6 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:drawableStart="@drawable/mail"
-                        android:drawablePadding="@dimen/_4sdp"
                         android:hint="Email"
                         android:inputType="textEmailAddress"
                         android:textColor="@color/textPrimary"
@@ -138,14 +137,13 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/emailInputLayout"
-                    app:startIconDrawable="@drawable/password">
+                    app:startIconDrawable="@drawable/password_signup">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/userSignInPassword"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:drawableStart="@drawable/password"
-                        android:drawablePadding="@dimen/_4sdp"
+                        android:drawableStart="@drawable/password_signup"
                         android:hint="Password"
                         android:inputType="textPassword"
                         android:textColor="@color/textPrimary"

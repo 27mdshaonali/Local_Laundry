@@ -120,7 +120,6 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:drawableStart="@drawable/name2"
-                        android:drawablePadding="@dimen/_4sdp"
                         android:hint="Full Name"
                         android:inputType="textEmailAddress"
                         android:textColor="@color/textPrimary"
@@ -145,7 +144,6 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:drawableStart="@drawable/mail"
-                        android:drawablePadding="@dimen/_4sdp"
                         android:hint="Email"
                         android:inputType="textEmailAddress"
                         android:textColor="@color/textPrimary"
@@ -171,7 +169,6 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:drawableStart="@drawable/password_signup"
-                        android:drawablePadding="@dimen/_4sdp"
                         android:hint="Password"
                         android:inputType="textPassword"
                         android:textColor="@color/textPrimary"
@@ -198,12 +195,101 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:drawableStart="@drawable/password_signup"
-                        android:drawablePadding="@dimen/_4sdp"
                         android:hint="Re - Password"
                         android:inputType="textPassword"
                         android:textColor="@color/textPrimary"
                         android:textColorHint="@color/text_shadow" />
                 </com.google.android.material.textfield.TextInputLayout>
+
+
+                <TextView
+                    android:layout_marginTop="@dimen/_16sdp"
+                    app:layout_constraintTop_toBottomOf="@id/reenterPasswordInputLayout"
+                    android:id="@+id/mustContains"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Password must contains"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="@dimen/_14ssp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <TextView
+                    android:layout_marginTop="@dimen/_4sdp"
+                    android:id="@+id/mustContainsNumber"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawableStart="@drawable/dot"
+                    android:text="At least 1 number (0...9)"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="@dimen/_12ssp"
+                    android:drawablePadding="@dimen/_10sdp"
+                    android:layout_marginStart="@dimen/_10sdp"
+                    android:textStyle="italic|normal"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/mustContains" />
+
+                <TextView
+                    android:id="@+id/mustContainsChar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawableStart="@drawable/dot"
+                    android:drawablePadding="@dimen/_10sdp"
+                    android:layout_marginStart="@dimen/_10sdp"
+                    android:text="At least 8 characters length"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="@dimen/_12ssp"
+                    android:textStyle="italic|normal"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/mustContainsNumber" />
+
+                <TextView
+                    android:id="@+id/mustContainsLowerCase"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawableStart="@drawable/dot"
+                    android:drawablePadding="@dimen/_10sdp"
+                    android:layout_marginStart="@dimen/_10sdp"
+                    android:text="At least 1 lowercase latter (a...z)"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="@dimen/_12ssp"
+                    android:textStyle="italic|normal"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/mustContainsChar" />
+
+                <TextView
+                    android:id="@+id/mustContainsLowerUpperCase"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawableStart="@drawable/dot"
+                    android:drawablePadding="@dimen/_10sdp"
+                    android:layout_marginStart="@dimen/_10sdp"
+                    android:text="At least upper case letter (A...Z)"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="@dimen/_12ssp"
+                    android:textStyle="italic|normal"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/mustContainsLowerCase" />
+
+                <TextView
+                    android:id="@+id/mustContainsSpecialSymbol"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawableStart="@drawable/dot"
+                    android:drawablePadding="@dimen/_10sdp"
+                    android:layout_marginStart="@dimen/_10sdp"
+                    android:text="At least 1 special symbol"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="@dimen/_12ssp"
+                    android:textStyle="italic|normal"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/mustContainsLowerUpperCase" />
 
                 <!-- Sign in button -->
                 <androidx.appcompat.widget.AppCompatButton
@@ -218,7 +304,7 @@
                     android:textSize="@dimen/_15ssp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/reenterPasswordInputLayout" />
+                    app:layout_constraintTop_toBottomOf="@id/mustContainsSpecialSymbol" />
 
                 <!-- Social login divider -->
                 <View
@@ -264,11 +350,11 @@
                     android:elevation="@dimen/_6sdp"
                     android:padding="@dimen/_6sdp"
                     android:scaleType="centerCrop"
-                    app:layout_goneMarginStart="@dimen/_20sdp"
                     android:src="@drawable/facebook"
                     app:layout_constraintEnd_toStartOf="@id/signUpWithX"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/loginWith"
+                    app:layout_goneMarginStart="@dimen/_20sdp"
                     app:riv_corner_radius="@dimen/_50sdp"
                     app:riv_mutate_background="true"
                     app:riv_oval="true" />
