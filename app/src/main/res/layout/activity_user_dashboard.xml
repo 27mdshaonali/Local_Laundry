@@ -32,40 +32,75 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Welcome, User!"
+            android:textColor="@color/textSecondary"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:textColor="@color/textSecondary"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <!-- Notice Board Title -->
         <TextView
             android:id="@+id/noticeBoardTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:text="📝 Notice Board"
+            android:textColor="@color/textPrimary"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="@color/textPrimary"
-            android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/welcomeText"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/welcomeText" />
 
         <!-- View All Button -->
         <TextView
             android:id="@+id/viewAllNotices"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="View All"
-            android:textSize="14sp"
-            android:textColor="@color/textSecondary"
             android:layout_marginTop="4dp"
             android:clickable="true"
             android:focusable="true"
-            app:layout_constraintTop_toBottomOf="@id/noticeBoardTitle"
-            app:layout_constraintEnd_toEndOf="parent" />
+            android:text="View All"
+            android:textColor="@color/textSecondary"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/noticeBoardTitle" />
+
+
+        <com.makeramen.roundedimageview.RoundedImageView
+            android:id="@+id/pickedImage"
+            android:layout_width="@dimen/_80sdp"
+            android:layout_height="@dimen/_80sdp"
+            android:layout_marginTop="@dimen/_20sdp"
+            android:padding="@dimen/_4sdp"
+            android:scaleType="fitXY"
+            android:src="@drawable/shaon"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/viewAllNotices"
+            app:riv_corner_radius="@dimen/_50sdp"
+            app:riv_mutate_background="true"
+            app:riv_oval="true" />
+
+        <com.makeramen.roundedimageview.RoundedImageView
+            android:id="@+id/picImage"
+            android:layout_width="@dimen/_30sdp"
+            android:layout_height="@dimen/_30sdp"
+            android:layout_marginStart="@dimen/_40sdp"
+            android:layout_marginTop="@dimen/_55sdp"
+            android:background="@color/appImageColorBackground"
+            android:elevation="@dimen/_10sdp"
+            android:padding="@dimen/_6sdp"
+            android:src="@drawable/camera"
+            app:layout_constraintBottom_toBottomOf="@id/pickedImage"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/pickedImage"
+            app:riv_corner_radius="@dimen/_50sdp"
+            app:riv_mutate_background="true"
+            app:riv_oval="true" />
+
 
         <!-- RecyclerView for Notice List -->
         <androidx.recyclerview.widget.RecyclerView
@@ -76,10 +111,10 @@
             android:layout_marginBottom="8dp"
             android:nestedScrollingEnabled="false"
             android:overScrollMode="never"
-            app:layout_constraintTop_toBottomOf="@id/viewAllNotices"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/cardContainer"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/cardContainer" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/picImage" />
 
         <!-- Quick Action Cards Container (Example Placeholder) -->
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -87,15 +122,13 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/noticeRecyclerView"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintTop_toBottomOf="@id/noticeRecyclerView">
 
             <!-- Add your quick action buttons or tiles here -->
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -8,6 +8,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -22,6 +24,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.makeramen.roundedimageview.RoundedImageView;
 
 public class UserDashboard extends AppCompatActivity {
 
@@ -33,6 +36,8 @@ public class UserDashboard extends AppCompatActivity {
             // TODO: Inform user that that your app will not show notifications.
         }
     });
+
+    RoundedImageView pickedImage, picImage;
 
 
     //====================== Firebase Cloud Messing Methods Code Starts Here ======================
@@ -50,6 +55,35 @@ public class UserDashboard extends AppCompatActivity {
         askNotificationPermission();
         initFirebaseToken();
         askSMSPermission();
+        initViews();
+    }
+
+    public void initViews() {
+        pickedImage = findViewById(R.id.pickedImage);
+        picImage = findViewById(R.id.picImage);
+
+        picImage.setOnClickListener(v -> setPickedImage());
+    }
+
+    public void setPickedImage() {
+
+        //Here I want to set the picked image from the gallery or snap pic
+
+        //Here I want to inflate image_picker.xml layout and want to work with imageview which is in the layout
+
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
+        View myView = layoutInflater.inflate(R.layout.image_picker, null);
+
+        RoundedImageView snapPhoto = myView.findViewById(R.id.snapPhoto);
+        RoundedImageView picImageFromGallery = myView.findViewById(R.id.picImageFromGallery);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(myView);
+        AlertDialog dialog = builder.create();
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        dialog.show();
+
+
     }
 
     public void initFirebaseToken() {

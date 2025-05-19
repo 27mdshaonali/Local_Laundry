@@ -12,6 +12,7 @@
     <color name="colorBackground">#F5F5F5</color> <!-- Main app background -->
     <color name="appImageColorBackground">#F0F0F0</color> <!-- Main app background -->
     <color name="colorSurface">#FFFFFF</color> <!-- Card or input background -->
+    <color name="colorSurface2">#FFFFFF</color> <!-- Card or input background -->
 
     <!-- Text -->
     <color name="textPrimary">#212121</color> <!-- For main text -->

@@ -28,8 +28,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         initializeView();
-        signInButton.setOnClickListener(v -> setLogin());
-        signUp.setOnClickListener(v -> setSignUp());
+
 
     }
 
@@ -37,7 +36,8 @@ public class MainActivity extends AppCompatActivity {
 
         signInButton = findViewById(R.id.signInButton);
         signUp = findViewById(R.id.signUp);
-
+        signInButton.setOnClickListener(v -> setLogin());
+        signUp.setOnClickListener(v -> setSignUp());
     }
 
     public void setSignUp() {

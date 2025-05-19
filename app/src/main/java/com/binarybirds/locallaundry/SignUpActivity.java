@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -17,8 +19,15 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.textfield.TextInputEditText;
+import com.makeramen.roundedimageview.RoundedImageView;
 
 public class SignUpActivity extends AppCompatActivity {
+
+    AppCompatTextView signIn;
+    TextInputEditText userSignUpFullName, userSignUpEmail, userSignUpEnterPassword, userSignUpReenterPassword;
+    AppCompatButton signUpButton;
+
+    TextView mustContainsNumber, mustContainsChar, mustContainsLowerCase, mustContainsLowerUpperCase, mustContainsSpecialSymbol;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,12 +44,12 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     public void initializeView() {
-        AppCompatTextView signIn = findViewById(R.id.signIn);
-        TextInputEditText userSignUpFullName = findViewById(R.id.userSignUpFullName);
-        TextInputEditText userSignUpEmail = findViewById(R.id.userSignUpEmail);
-        TextInputEditText userSignUpEnterPassword = findViewById(R.id.userSignUpEnterPassword);
-        TextInputEditText userSignUpReenterPassword = findViewById(R.id.userSignUpReenterPassword);
-        AppCompatButton signUpButton = findViewById(R.id.signUpButton);
+        signIn = findViewById(R.id.signIn);
+        userSignUpFullName = findViewById(R.id.userSignUpFullName);
+        userSignUpEmail = findViewById(R.id.userSignUpEmail);
+        userSignUpEnterPassword = findViewById(R.id.userSignUpEnterPassword);
+        userSignUpReenterPassword = findViewById(R.id.userSignUpReenterPassword);
+        signUpButton = findViewById(R.id.signUpButton);
 
         signUpButton.setEnabled(false);
 
@@ -65,6 +74,8 @@ public class SignUpActivity extends AppCompatActivity {
         userSignUpReenterPassword.addTextChangedListener(inputWatcher);
 
         signIn.setOnClickListener(view -> signIn());
+        signUpButton.setOnClickListener(view -> goToDashboard());
+
     }
 
     private void validateFields(TextInputEditText fullNameField, TextInputEditText emailField, TextInputEditText passwordField, TextInputEditText rePasswordField, AppCompatButton signUpButton) {
@@ -85,11 +96,11 @@ public class SignUpActivity extends AppCompatActivity {
 
         boolean allPasswordConditionsMet = isLengthValid && hasNumber && hasLower && hasUpper && hasSpecial;
 
-        TextView mustContainsNumber = findViewById(R.id.mustContainsNumber);
-        TextView mustContainsChar = findViewById(R.id.mustContainsChar);
-        TextView mustContainsLowerCase = findViewById(R.id.mustContainsLowerCase);
-        TextView mustContainsLowerUpperCase = findViewById(R.id.mustContainsLowerUpperCase);
-        TextView mustContainsSpecialSymbol = findViewById(R.id.mustContainsSpecialSymbol);
+        mustContainsNumber = findViewById(R.id.mustContainsNumber);
+        mustContainsChar = findViewById(R.id.mustContainsChar);
+        mustContainsLowerCase = findViewById(R.id.mustContainsLowerCase);
+        mustContainsLowerUpperCase = findViewById(R.id.mustContainsLowerUpperCase);
+        mustContainsSpecialSymbol = findViewById(R.id.mustContainsSpecialSymbol);
 
         int defaultColor = ContextCompat.getColor(this, R.color.textSecondary);
         int successColor = ContextCompat.getColor(this, R.color.colorSuccess);
@@ -138,9 +149,21 @@ public class SignUpActivity extends AppCompatActivity {
         }
 
         signUpButton.setEnabled(allFilled && passwordsMatch && allPasswordConditionsMet);
+
     }
 
     public void signIn() {
         startActivity(new Intent(this, MainActivity.class));
+    }
+
+    public void goToDashboard() {
+        startActivity(new Intent(this, UserDashboard.class));
+
+        userSignUpFullName.setText("");
+        userSignUpEmail.setText("");
+        userSignUpEnterPassword.setText("");
+        userSignUpReenterPassword.setText("");
+
+
     }
 }
