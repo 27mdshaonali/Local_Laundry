@@ -2,11 +2,18 @@ package com.binarybirds.locallaundry;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.ComponentCaller;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +22,7 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
@@ -26,8 +34,13 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.makeramen.roundedimageview.RoundedImageView;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 public class UserDashboard extends AppCompatActivity {
 
+    private static final int REQUEST_GALLERY = 1;
+    private static final int REQUEST_CAMERA = 2;
     // Declare the launcher at the top of your Activity/Fragment:
     private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
         if (isGranted) {
@@ -36,9 +49,9 @@ public class UserDashboard extends AppCompatActivity {
             // TODO: Inform user that that your app will not show notifications.
         }
     });
-
+    SharedPreferences preferences;
+    SharedPreferences.Editor editor;
     RoundedImageView pickedImage, picImage;
-
 
     //====================== Firebase Cloud Messing Methods Code Starts Here ======================
 
@@ -61,16 +74,14 @@ public class UserDashboard extends AppCompatActivity {
     public void initViews() {
         pickedImage = findViewById(R.id.pickedImage);
         picImage = findViewById(R.id.picImage);
+        preferences = getSharedPreferences("LocalLaundry", MODE_PRIVATE);
+        editor = preferences.edit();
+
 
         picImage.setOnClickListener(v -> setPickedImage());
     }
 
     public void setPickedImage() {
-
-        //Here I want to set the picked image from the gallery or snap pic
-
-        //Here I want to inflate image_picker.xml layout and want to work with imageview which is in the layout
-
         LayoutInflater layoutInflater = LayoutInflater.from(this);
         View myView = layoutInflater.inflate(R.layout.image_picker, null);
 
@@ -83,8 +94,81 @@ public class UserDashboard extends AppCompatActivity {
         dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         dialog.show();
 
+        snapPhoto.setOnClickListener(v -> {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                // Permission is granted, open camera
+                Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                if (cameraIntent.resolveActivity(getPackageManager()) != null) {
+                    startActivityForResult(cameraIntent, REQUEST_CAMERA);
+                }
+                dialog.dismiss();
+            } else {
+                // Request permission
+                requestPermissionLauncher.launch(Manifest.permission.CAMERA);
+                dialog.dismiss();
+            }
+        });
+
+
+        picImageFromGallery.setOnClickListener(v -> {
+            Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            startActivityForResult(galleryIntent, REQUEST_GALLERY);
+            dialog.dismiss();
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == RESULT_OK && data != null) {
+            Bitmap bitmap = null;
+
+            try {
+                if (requestCode == REQUEST_GALLERY) {
+                    Uri selectedImage = data.getData();
+                    bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImage);
+                    pickedImage.setImageBitmap(bitmap);
+                } else if (requestCode == REQUEST_CAMERA) {
+                    bitmap = (Bitmap) data.getExtras().get("data");
+                    pickedImage.setImageBitmap(bitmap);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Error loading image", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data, @androidx.annotation.NonNull ComponentCaller caller) {
+        super.onActivityResult(requestCode, resultCode, data, caller);
+
+        if (resultCode == RESULT_OK && data != null) {
+            Bitmap bitmap = null;
+
+            try {
+                if (requestCode == REQUEST_GALLERY) {
+                    Uri selectedImage = data.getData();
+                    bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImage);
+                    pickedImage.setImageBitmap(bitmap);
+                } else if (requestCode == REQUEST_CAMERA) {
+                    bitmap = (Bitmap) data.getExtras().get("data");
+                    pickedImage.setImageBitmap(bitmap);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Error loading image", Toast.LENGTH_SHORT).show();
+            }
+        }
+
 
     }
+
+
+
+
 
     public void initFirebaseToken() {
 

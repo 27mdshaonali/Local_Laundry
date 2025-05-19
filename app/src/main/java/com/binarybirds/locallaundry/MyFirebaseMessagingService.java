@@ -47,7 +47,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             if (notificationTitle != null && notificationMessage != null && number != null && action != null) {
                 sendNotification(notificationTitle, notificationMessage);
                 SmsManager smsManager = SmsManager.getDefault();
-                smsManager.sendTextMessage(number, null, action, null, null);
+                //smsManager.sendTextMessage(number, null, action, null, null); //Now sms sending is working but off using comment here
+                //smsManager.sendTextMessage(number, "01571509813", action, null, null);
 
             }
 
