@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -29,6 +30,9 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.android.volley.Request;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -36,6 +40,8 @@ import com.makeramen.roundedimageview.RoundedImageView;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class UserDashboard extends AppCompatActivity {
 
@@ -77,6 +83,15 @@ public class UserDashboard extends AppCompatActivity {
         preferences = getSharedPreferences("LocalLaundry", MODE_PRIVATE);
         editor = preferences.edit();
 
+        // Restore saved image
+        String savedImage = preferences.getString("image", null);
+        if (savedImage != null) {
+            byte[] decodedBytes = Base64.decode(savedImage, Base64.DEFAULT);
+            Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+            pickedImage.setImageBitmap(bitmap);
+
+        }
+
 
         picImage.setOnClickListener(v -> setPickedImage());
     }
@@ -96,19 +111,16 @@ public class UserDashboard extends AppCompatActivity {
 
         snapPhoto.setOnClickListener(v -> {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                // Permission is granted, open camera
                 Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 if (cameraIntent.resolveActivity(getPackageManager()) != null) {
                     startActivityForResult(cameraIntent, REQUEST_CAMERA);
                 }
                 dialog.dismiss();
             } else {
-                // Request permission
                 requestPermissionLauncher.launch(Manifest.permission.CAMERA);
                 dialog.dismiss();
             }
         });
-
 
         picImageFromGallery.setOnClickListener(v -> {
             Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
@@ -133,6 +145,17 @@ public class UserDashboard extends AppCompatActivity {
                     bitmap = (Bitmap) data.getExtras().get("data");
                     pickedImage.setImageBitmap(bitmap);
                 }
+
+                if (bitmap != null) {
+                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+                    byte[] byteArray = outputStream.toByteArray();
+                    String encodedImage = Base64.encodeToString(byteArray, Base64.DEFAULT);
+
+                    editor.putString("image", encodedImage);
+                    editor.apply();
+                }
+
             } catch (IOException e) {
                 e.printStackTrace();
                 Toast.makeText(this, "Error loading image", Toast.LENGTH_SHORT).show();
@@ -161,10 +184,51 @@ public class UserDashboard extends AppCompatActivity {
                 e.printStackTrace();
                 Toast.makeText(this, "Error loading image", Toast.LENGTH_SHORT).show();
             }
+
+            if (bitmap != null) {
+                pickedImage.setImageBitmap(bitmap);
+                uploadBitmap(bitmap); // Upload and get URL
+            }
+
+
         }
 
 
+
     }
+
+
+
+
+    private void uploadBitmap(Bitmap bitmap) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+        byte[] imageBytes = byteArrayOutputStream.toByteArray();
+        String encodedImage = Base64.encodeToString(imageBytes, Base64.DEFAULT);
+
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, "http://192.168.0.102/Local%20Laundry/upload.php",
+                response -> {
+                    // Handle server response
+                    Toast.makeText(this, "Upload successful: " + response, Toast.LENGTH_SHORT).show();
+
+                    // Save the image URL (assuming response is the image URL)
+                    editor.putString("image_url", response);
+                    editor.apply();
+                },
+                error -> {
+                    Toast.makeText(this, "Upload failed: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                }) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("image", encodedImage);
+                return params;
+            }
+        };
+
+        Volley.newRequestQueue(this).add(stringRequest);
+    }
+
 
 
 
