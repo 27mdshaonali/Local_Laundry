@@ -1,13 +1,14 @@
 package com.binarybirds.locallaundry;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,16 +19,26 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.material.textfield.TextInputEditText;
 import com.makeramen.roundedimageview.RoundedImageView;
 
-public class SignUpActivity extends AppCompatActivity {
+import java.util.HashMap;
+import java.util.Map;
 
+public class SignUpActivity extends AppCompatActivity {
+    private static final int REQUEST_GALLERY = 1;
     AppCompatTextView signIn;
     TextInputEditText userSignUpFullName, userSignUpEmail, userSignUpEnterPassword, userSignUpReenterPassword;
     AppCompatButton signUpButton;
-
+    RoundedImageView appImage;
     TextView mustContainsNumber, mustContainsChar, mustContainsLowerCase, mustContainsLowerUpperCase, mustContainsSpecialSymbol;
+    String SIGN_UP_URL = "https://codecanvas.top/WashWave/sign_up.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,18 +51,102 @@ public class SignUpActivity extends AppCompatActivity {
             return insets;
         });
 
-        initializeView();
-    }
 
-    public void initializeView() {
         signIn = findViewById(R.id.signIn);
         userSignUpFullName = findViewById(R.id.userSignUpFullName);
         userSignUpEmail = findViewById(R.id.userSignUpEmail);
         userSignUpEnterPassword = findViewById(R.id.userSignUpEnterPassword);
         userSignUpReenterPassword = findViewById(R.id.userSignUpReenterPassword);
         signUpButton = findViewById(R.id.signUpButton);
-
+        appImage = findViewById(R.id.appImage);
         signUpButton.setEnabled(false);
+
+
+
+
+
+        signIn.setOnClickListener(view -> signIn());
+
+
+        signUpButton.setOnClickListener(v -> {
+            String name = userSignUpFullName.getText().toString().trim();
+            String email = userSignUpEmail.getText().toString().trim();
+            String pass = userSignUpEnterPassword.getText().toString().trim();
+            String rePass = userSignUpReenterPassword.getText().toString().trim();
+
+            if (name.isEmpty() || email.isEmpty() || pass.isEmpty() || rePass.isEmpty()) {
+                Toast.makeText(getApplicationContext(), "Please fill all the fields", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (!pass.equals(rePass)) {
+                Toast.makeText(getApplicationContext(), "Passwords do not match", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+
+            StringRequest stringRequest = new StringRequest(Request.Method.POST, SIGN_UP_URL, response -> {
+                switch (response.trim()) {
+                    case "success":
+
+
+                        Toast.makeText(getApplicationContext(), "Sign Up Successful", Toast.LENGTH_SHORT).show();
+
+                        // ✅ Create session after successful sign-up
+                        SessionManager sessionManager = new SessionManager(this);
+                        sessionManager.createLoginSession(email);
+
+
+                        SharedPreferences prefs = getSharedPreferences(""+R.string.app_name, MODE_PRIVATE);
+                        prefs.edit().putString("email", email).apply();
+
+
+                        // Navigate to Dashboard
+                        Intent intent = new Intent(getApplicationContext(), UserDashboard.class);
+                        intent.putExtra("email", email);
+                        startActivity(intent);
+                        finish();
+                        break;
+
+                    case "exists":
+                        Toast.makeText(getApplicationContext(), "Email already exists", Toast.LENGTH_SHORT).show();
+                        break;
+                    case "image_upload_failed":
+                        Toast.makeText(getApplicationContext(), "Image upload failed", Toast.LENGTH_SHORT).show();
+                        break;
+                    default:
+                        Toast.makeText(getApplicationContext(), "Failed: " + response, Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            }, error -> {
+                NetworkResponse networkResponse = error.networkResponse;
+                if (networkResponse != null) {
+                    Log.e("VolleyError", "Status Code: " + networkResponse.statusCode);
+                    Log.e("VolleyError", "Response Data: " + new String(networkResponse.data));
+                }
+                Toast.makeText(getApplicationContext(), "Error: " + error, Toast.LENGTH_LONG).show();
+            }) {
+                @Override
+                protected Map<String, String> getParams() throws AuthFailureError {
+                    Map<String, String> data = new HashMap<>();
+                    data.put("name", name);
+                    data.put("email", email);
+                    data.put("password", pass);
+                    return data;
+                }
+
+                @Override
+                public String getBodyContentType() {
+                    return "application/x-www-form-urlencoded; charset=UTF-8";
+                }
+            };
+
+            RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+            requestQueue.add(stringRequest);
+        });
+
+
+
 
         TextWatcher inputWatcher = new TextWatcher() {
             @Override
@@ -73,13 +168,14 @@ public class SignUpActivity extends AppCompatActivity {
         userSignUpEnterPassword.addTextChangedListener(inputWatcher);
         userSignUpReenterPassword.addTextChangedListener(inputWatcher);
 
-        signIn.setOnClickListener(view -> signIn());
-        signUpButton.setOnClickListener(view -> goToDashboard());
+        initializeView();
+    }
+
+    public void initializeView() {
 
     }
 
     private void validateFields(TextInputEditText fullNameField, TextInputEditText emailField, TextInputEditText passwordField, TextInputEditText rePasswordField, AppCompatButton signUpButton) {
-
         String fullName = fullNameField.getText().toString().trim();
         String email = emailField.getText().toString().trim();
         String password = passwordField.getText().toString();
@@ -121,7 +217,6 @@ public class SignUpActivity extends AppCompatActivity {
         mustContainsSpecialSymbol.setTextColor(defaultColor);
 
         if (!passwordsMatch && !rePassword.isEmpty()) {
-            //rePasswordField.setError("Passwords do not match");
             Log.d("SignUpActivity", "Passwords do not match");
         } else {
             rePasswordField.setError(null);
@@ -149,21 +244,10 @@ public class SignUpActivity extends AppCompatActivity {
         }
 
         signUpButton.setEnabled(allFilled && passwordsMatch && allPasswordConditionsMet);
-
     }
 
     public void signIn() {
         startActivity(new Intent(this, MainActivity.class));
     }
 
-    public void goToDashboard() {
-        startActivity(new Intent(this, UserDashboard.class));
-
-        userSignUpFullName.setText("");
-        userSignUpEmail.setText("");
-        userSignUpEnterPassword.setText("");
-        userSignUpReenterPassword.setText("");
-
-
-    }
 }

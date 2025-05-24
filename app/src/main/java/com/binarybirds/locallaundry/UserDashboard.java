@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -30,13 +29,21 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.makeramen.roundedimageview.RoundedImageView;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -55,9 +62,9 @@ public class UserDashboard extends AppCompatActivity {
             // TODO: Inform user that that your app will not show notifications.
         }
     });
-    SharedPreferences preferences;
-    SharedPreferences.Editor editor;
     RoundedImageView pickedImage, picImage;
+    SessionManager sessionManager;
+    String ORDERS_URL = "https://codecanvas.top/WashWave/get_user_orders.php";
 
     //====================== Firebase Cloud Messing Methods Code Starts Here ======================
 
@@ -80,20 +87,89 @@ public class UserDashboard extends AppCompatActivity {
     public void initViews() {
         pickedImage = findViewById(R.id.pickedImage);
         picImage = findViewById(R.id.picImage);
-        preferences = getSharedPreferences("LocalLaundry", MODE_PRIVATE);
-        editor = preferences.edit();
 
-        // Restore saved image
-        String savedImage = preferences.getString("image", null);
-        if (savedImage != null) {
-            byte[] decodedBytes = Base64.decode(savedImage, Base64.DEFAULT);
-            Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
-            pickedImage.setImageBitmap(bitmap);
 
+        // Initialize SessionManager
+        sessionManager = new SessionManager(getApplicationContext());
+
+        // Check if user is logged in
+        if (!sessionManager.isLoggedIn()) {
+            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+            finish();
+            return;
         }
 
 
+        // Get stored email from SharedPreferences
+        SharedPreferences prefs = getSharedPreferences("" + R.string.app_name, MODE_PRIVATE);
+        String email = prefs.getString("email", null);
+
+        if (email == null) {
+            Toast.makeText(this, "Email not found. Please log in again.", Toast.LENGTH_SHORT).show();
+            sessionManager.logout();
+            startActivity(new Intent(this, MainActivity.class));
+            finish();
+            return;
+        }
+
+        // Fetch user orders using the stored email
+        getUserPreferences(email);
+
         picImage.setOnClickListener(v -> setPickedImage());
+    }
+
+    public void getUserPreferences(String email) {
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, ORDERS_URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+                try {
+                    JSONArray jsonArray = new JSONArray(response);
+                    //result.setText("");  // Clear previous results
+
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject order = jsonArray.getJSONObject(i);
+
+                        String itemName = order.getString("item_name");
+                        int id = order.getInt("id");
+                        int totalPrice = order.getInt("total_price");
+                        int quantity = order.getInt("quantity");
+                        String status = order.getString("status");
+
+                        Toast.makeText(getApplicationContext(), "item name: " + itemName, Toast.LENGTH_SHORT).show();
+
+
+                    }
+
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    Toast.makeText(UserDashboard.this, "Error parsing Order Data JSon: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+                error.printStackTrace();
+                Toast.makeText(getApplicationContext(), "Error parsing order data", Toast.LENGTH_SHORT).show();
+
+            }
+        }) {
+
+            @Nullable
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("email", email); // Use the actual logged-in email
+                return params;
+            }
+        };
+
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        requestQueue.add(stringRequest);
+
     }
 
     public void setPickedImage() {
@@ -152,8 +228,7 @@ public class UserDashboard extends AppCompatActivity {
                     byte[] byteArray = outputStream.toByteArray();
                     String encodedImage = Base64.encodeToString(byteArray, Base64.DEFAULT);
 
-                    editor.putString("image", encodedImage);
-                    editor.apply();
+
                 }
 
             } catch (IOException e) {
@@ -187,51 +262,14 @@ public class UserDashboard extends AppCompatActivity {
 
             if (bitmap != null) {
                 pickedImage.setImageBitmap(bitmap);
-                uploadBitmap(bitmap); // Upload and get URL
+
             }
 
 
         }
 
 
-
     }
-
-
-
-
-    private void uploadBitmap(Bitmap bitmap) {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
-        byte[] imageBytes = byteArrayOutputStream.toByteArray();
-        String encodedImage = Base64.encodeToString(imageBytes, Base64.DEFAULT);
-
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, "http://192.168.0.102/Local%20Laundry/upload.php",
-                response -> {
-                    // Handle server response
-                    Toast.makeText(this, "Upload successful: " + response, Toast.LENGTH_SHORT).show();
-
-                    // Save the image URL (assuming response is the image URL)
-                    editor.putString("image_url", response);
-                    editor.apply();
-                },
-                error -> {
-                    Toast.makeText(this, "Upload failed: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                }) {
-            @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> params = new HashMap<>();
-                params.put("image", encodedImage);
-                return params;
-            }
-        };
-
-        Volley.newRequestQueue(this).add(stringRequest);
-    }
-
-
-
-
 
 
     public void initFirebaseToken() {
