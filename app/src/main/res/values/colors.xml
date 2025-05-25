@@ -27,6 +27,12 @@
 
 
 
+    <color name="appBarBG">#03A9F4</color>
+    <color name="appBarItemColor">#ffffff</color>
+
+
+
+
 
     <!-- ✅ Primary button: Used for important actions like "Place Order", "Submit", "Pay Now" -->
     <color name="btn_primary">#4CAF50</color> <!-- Green -->

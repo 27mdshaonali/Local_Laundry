@@ -2,32 +2,30 @@ package com.binarybirds.locallaundry;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.app.ComponentCaller;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.util.Base64;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
+import android.view.MenuItem;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -38,6 +36,11 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationBarView;
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.makeramen.roundedimageview.RoundedImageView;
 
@@ -45,8 +48,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,7 +64,14 @@ public class UserDashboard extends AppCompatActivity {
         }
     });
     RoundedImageView pickedImage, picImage;
+    TextView welcomeText, viewAllNotices;
     SessionManager sessionManager;
+    BottomNavigationView bottomNav;
+    DrawerLayout drawerLayout;
+    AppBarLayout appBarLayout;
+    MaterialToolbar toolbar;
+    FrameLayout frameLayout;
+    NavigationView drawerNavigationView;
     String ORDERS_URL = "https://codecanvas.top/WashWave/get_user_orders.php";
 
     //====================== Firebase Cloud Messing Methods Code Starts Here ======================
@@ -85,37 +93,128 @@ public class UserDashboard extends AppCompatActivity {
     }
 
     public void initViews() {
-        pickedImage = findViewById(R.id.pickedImage);
-        picImage = findViewById(R.id.picImage);
+//        pickedImage = findViewById(R.id.pickedImage);
+//        picImage = findViewById(R.id.picImage);
+        welcomeText = findViewById(R.id.welcome);
+//        viewAllNotices = findViewById(R.id.viewAllNotices);
+        bottomNav = findViewById(R.id.bottomNav);
+        drawerLayout = findViewById(R.id.drawerLayout);
+        appBarLayout = findViewById(R.id.appBarLayout);
+        toolbar = findViewById(R.id.toolBar);
+        frameLayout = findViewById(R.id.frameLayout);
+        drawerNavigationView = findViewById(R.id.drawerNavigationView);
 
+
+        SharedPreferences preferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
+        boolean rememberMe = preferences.getBoolean("rememberMe", false);
+        String email = preferences.getString("email", null);
 
         // Initialize SessionManager
         sessionManager = new SessionManager(getApplicationContext());
 
-        // Check if user is logged in
-        if (!sessionManager.isLoggedIn()) {
-            startActivity(new Intent(getApplicationContext(), MainActivity.class));
-            finish();
-            return;
+
+        if (rememberMe && email != null) {
+            sessionManager.isLoggedIn();
+            getUserPreferences(email);
         }
 
+//        if (rememberMe && email != null && sessionManager.isLoggedIn()) {
+//            // Auto-login successful, show email or fetch data
+//            welcomeText.setText("Welcome, " + email);
+//            getUserPreferences(email);  // Load user data from server
+//        }
 
-        // Get stored email from SharedPreferences
-        SharedPreferences prefs = getSharedPreferences("" + R.string.app_name, MODE_PRIVATE);
-        String email = prefs.getString("email", null);
+        /*
+        else {
+            // Not remembered or session expired, redirect to login screen
+            Toast.makeText(this, "Please log in again", Toast.LENGTH_SHORT).show();
+            sessionManager.logout(); // Clear session
+            Intent intent = new Intent(UserDashboard.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        }
 
-        if (email == null) {
-            Toast.makeText(this, "Email not found. Please log in again.", Toast.LENGTH_SHORT).show();
+         */
+
+
+        bottomNav.getOrCreateBadge(R.id.notification).setNumber(9);
+
+
+        bottomNav.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@androidx.annotation.NonNull MenuItem item) {
+                if (item.getItemId() == R.id.home) {
+
+
+                    startActivity(new Intent(UserDashboard.this, UserDashboard.class));
+
+                } else if (item.getItemId() == R.id.cart) {
+
+                    Toast.makeText(UserDashboard.this, "Cart", Toast.LENGTH_SHORT).show();
+
+                } else if (item.getItemId() == R.id.notification) {
+
+                    bottomNav.removeBadge(R.id.notification);
+                    Toast.makeText(UserDashboard.this, "Notification", Toast.LENGTH_SHORT).show();
+
+                } else if (item.getItemId() == R.id.profile) {
+
+                    Toast.makeText(UserDashboard.this, "Profile", Toast.LENGTH_SHORT).show();
+
+                }
+
+
+                return true;
+            }
+        });
+
+
+
+/*
+        welcomeText.setOnClickListener(v -> {
             sessionManager.logout();
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.clear();  // Clear Remember Me preferences
+            editor.apply();
+
             startActivity(new Intent(this, MainActivity.class));
             finish();
-            return;
-        }
+        });
 
-        // Fetch user orders using the stored email
-        getUserPreferences(email);
+ */
 
-        picImage.setOnClickListener(v -> setPickedImage());
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close);
+        drawerLayout.addDrawerListener(toggle);
+
+        welcomeText.setOnClickListener(v -> {
+
+            startActivity(new Intent(this, Home.class));
+
+
+        });
+
+        drawerNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@androidx.annotation.NonNull MenuItem item) {
+
+                if (item.getItemId() == R.id.allOrders) {
+
+                    Toast.makeText(UserDashboard.this, "All Orders", Toast.LENGTH_SHORT).show();
+
+                } else if (item.getItemId() == R.id.pendingOrders) {
+                    Toast.makeText(UserDashboard.this, "Pending Orders", Toast.LENGTH_SHORT).show();
+                } else if (item.getItemId() == R.id.pickedOrder) {
+
+                    Toast.makeText(UserDashboard.this, "Picked Orders", Toast.LENGTH_SHORT).show();
+
+                } else if (item.getItemId() == R.id.offer) {
+                    Toast.makeText(UserDashboard.this, "Offer", Toast.LENGTH_SHORT).show();
+                }
+
+                return true;
+            }
+        });
+
     }
 
     public void getUserPreferences(String email) {
@@ -158,6 +257,7 @@ public class UserDashboard extends AppCompatActivity {
             }
         }) {
 
+
             @Nullable
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
@@ -165,6 +265,8 @@ public class UserDashboard extends AppCompatActivity {
                 params.put("email", email); // Use the actual logged-in email
                 return params;
             }
+
+
         };
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
@@ -172,73 +274,7 @@ public class UserDashboard extends AppCompatActivity {
 
     }
 
-    public void setPickedImage() {
-        LayoutInflater layoutInflater = LayoutInflater.from(this);
-        View myView = layoutInflater.inflate(R.layout.image_picker, null);
-
-        RoundedImageView snapPhoto = myView.findViewById(R.id.snapPhoto);
-        RoundedImageView picImageFromGallery = myView.findViewById(R.id.picImageFromGallery);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setView(myView);
-        AlertDialog dialog = builder.create();
-        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-        dialog.show();
-
-        snapPhoto.setOnClickListener(v -> {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                if (cameraIntent.resolveActivity(getPackageManager()) != null) {
-                    startActivityForResult(cameraIntent, REQUEST_CAMERA);
-                }
-                dialog.dismiss();
-            } else {
-                requestPermissionLauncher.launch(Manifest.permission.CAMERA);
-                dialog.dismiss();
-            }
-        });
-
-        picImageFromGallery.setOnClickListener(v -> {
-            Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            startActivityForResult(galleryIntent, REQUEST_GALLERY);
-            dialog.dismiss();
-        });
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (resultCode == RESULT_OK && data != null) {
-            Bitmap bitmap = null;
-
-            try {
-                if (requestCode == REQUEST_GALLERY) {
-                    Uri selectedImage = data.getData();
-                    bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImage);
-                    pickedImage.setImageBitmap(bitmap);
-                } else if (requestCode == REQUEST_CAMERA) {
-                    bitmap = (Bitmap) data.getExtras().get("data");
-                    pickedImage.setImageBitmap(bitmap);
-                }
-
-                if (bitmap != null) {
-                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
-                    byte[] byteArray = outputStream.toByteArray();
-                    String encodedImage = Base64.encodeToString(byteArray, Base64.DEFAULT);
-
-
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
-                Toast.makeText(this, "Error loading image", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-
+/*
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data, @androidx.annotation.NonNull ComponentCaller caller) {
         super.onActivityResult(requestCode, resultCode, data, caller);
@@ -272,6 +308,8 @@ public class UserDashboard extends AppCompatActivity {
     }
 
 
+ */
+
     public void initFirebaseToken() {
 
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
@@ -285,7 +323,7 @@ public class UserDashboard extends AppCompatActivity {
                 // Get new FCM registration token
                 String token = task.getResult();
                 Log.d("firebaseToken", token);
-                Toast.makeText(UserDashboard.this, token, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(UserDashboard.this, token, Toast.LENGTH_SHORT).show();
 
 
             }

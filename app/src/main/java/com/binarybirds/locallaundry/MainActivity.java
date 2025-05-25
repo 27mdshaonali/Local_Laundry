@@ -32,35 +32,51 @@ public class MainActivity extends AppCompatActivity {
     AppCompatTextView signUp;
     AppCompatButton signInButton;
     TextInputEditText userSignInEmail, userSignInPassword;
-    AppCompatCheckBox checkBox;
+    AppCompatCheckBox rememberMeCheckbox;
     AppCompatTextView forgotPassword;
     String email, password;
     RoundedImageView logInWithFB;
     String SIGN_IN_URL = "https://codecanvas.top/WashWave/sign_in.php";
     SessionManager sessionManager;
+    SharedPreferences preferences;
+    SharedPreferences.Editor editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-
         initializeView();
-
         sessionManager = new SessionManager(this);
 
+        // If already logged in
         if (sessionManager.isLoggedIn()) {
             startActivity(new Intent(MainActivity.this, UserDashboard.class));
             finish();
         }
 
+        // Load saved credentials
+        boolean rememberMe = preferences.getBoolean("rememberMe", false);
+        if (rememberMe) {
+            userSignInEmail.setText(preferences.getString("email", ""));
+            userSignInPassword.setText(preferences.getString("password", ""));
+            rememberMeCheckbox.setChecked(true);
+        }
 
+        // Button Clicks
+        signUp.setOnClickListener(v -> setSignUp());
+        signInButton.setOnClickListener(v -> setSignInBtn());
+        logInWithFB.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, UserDashboard.class));
+            finish();
+        });
     }
 
     public void initializeView() {
@@ -68,133 +84,70 @@ public class MainActivity extends AppCompatActivity {
         signUp = findViewById(R.id.signUp);
         userSignInEmail = findViewById(R.id.userSignInEmail);
         userSignInPassword = findViewById(R.id.userSignInPassword);
-        checkBox = findViewById(R.id.checkBox);
+        rememberMeCheckbox = findViewById(R.id.checkBox);
         forgotPassword = findViewById(R.id.forgotPassword);
         logInWithFB = findViewById(R.id.logInWithFB);
 
-
-        signUp.setOnClickListener(v -> setSignUp());
-        logInWithFB.setOnClickListener(v -> {
-            startActivity(new Intent(this, UserDashboard.class));
-
-            signInButton.setOnClickListener(v1 -> {
-
-                email = userSignInEmail.getText().toString();
-                password = userSignInPassword.getText().toString();
-
-                if (!email.isEmpty() && !password.isEmpty()) {
-
-                    StringRequest stringRequest = new StringRequest(Request.Method.POST, SIGN_IN_URL, new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-
-                            if (response.trim().equals("success")) {
-                                sessionManager.createLoginSession(email);
-
-                                SharedPreferences prefs = getSharedPreferences("" + R.string.app_name, MODE_PRIVATE);
-                                prefs.edit().putString("email", email).apply();
-
-                                Intent intent = new Intent(getApplicationContext(), UserDashboard.class);
-//                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                intent.putExtra("email", email);
-                                startActivity(intent);
-                                finish();
-
-                            } else {
-                                Toast.makeText(getApplicationContext(), "Invalid email or password", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            if (error.networkResponse != null) {
-                                Toast.makeText(getApplicationContext(), "Server Error: " + error.networkResponse.statusCode, Toast.LENGTH_LONG).show();
-                            } else {
-                                Toast.makeText(getApplicationContext(), "Network Error: " + error, Toast.LENGTH_LONG).show();
-                            }
-                        }
-                    }) {
-                        @Nullable
-                        @Override
-                        protected Map<String, String> getParams() throws AuthFailureError {
-                            Map<String, String> data = new HashMap<>();
-                            data.put("email", email);
-                            data.put("password", password);
-                            return data;
-                        }
-                    };
-
-                    RequestQueue requestQueue = Volley.newRequestQueue(this);
-                    requestQueue.add(stringRequest);
-
-                } else {
-                    Toast.makeText(getApplicationContext(), "Please fill all fields", Toast.LENGTH_SHORT).show();
-                }
-
-            });
-        });
-        signInButton.setOnClickListener(v -> setSignInBtn());
+        preferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
+        editor = preferences.edit();
     }
-
 
     public void setSignUp() {
         startActivity(new Intent(this, SignUpActivity.class));
     }
 
     public void setSignInBtn() {
-
-        email = userSignInEmail.getText().toString();
-        password = userSignInPassword.getText().toString();
+        email = userSignInEmail.getText().toString().trim();
+        password = userSignInPassword.getText().toString().trim();
+        boolean rememberMe = rememberMeCheckbox.isChecked();
 
         if (!email.isEmpty() && !password.isEmpty()) {
+            StringRequest stringRequest = new StringRequest(Request.Method.POST, SIGN_IN_URL,
+                    response -> {
+                        if (response.trim().equals("success")) {
+                            sessionManager.createLoginSession(email);
 
+                            // Save credentials if rememberMe is checked
+                            if (rememberMe) {
+                                editor.putBoolean("rememberMe", true);
+                                editor.putString("email", email);
+                                editor.putString("password", password);
+                            } else {
+                                editor.clear();
+                            }
+                            editor.apply();
 
-            StringRequest stringRequest = new StringRequest(Request.Method.POST, SIGN_IN_URL, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    if (response.trim().equals("success")) {
-                        sessionManager.createLoginSession(email);
-                        SharedPreferences prefs = getSharedPreferences("" + R.string.app_name, MODE_PRIVATE);
-                        prefs.edit().putString("email", email).apply();
-
-                        Intent intent = new Intent(getApplicationContext(), UserDashboard.class);
-                        intent.putExtra("email", email);
-                        startActivity(intent);
-                        finish();
+                            Intent intent = new Intent(MainActivity.this, UserDashboard.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            intent.putExtra("email", email);
+                            startActivity(intent);
+                            finish();
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Invalid email or password", Toast.LENGTH_SHORT).show();
+                        }
+                    },
+                    error -> {
+                        if (error.networkResponse != null) {
+                            Toast.makeText(getApplicationContext(), "Server Error: " + error.networkResponse.statusCode, Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Network Error: " + error.toString(), Toast.LENGTH_LONG).show();
+                        }
                     }
-
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-
-                    if (error.networkResponse != null) {
-                        Toast.makeText(getApplicationContext(), "Server Error: " + error.networkResponse.statusCode, Toast.LENGTH_LONG).show();
-                    }
-
-                }
-            }) {
-
+            ) {
                 @Nullable
                 @Override
                 protected Map<String, String> getParams() throws AuthFailureError {
-
                     Map<String, String> data = new HashMap<>();
                     data.put("email", email);
                     data.put("password", password);
                     return data;
                 }
-
             };
 
-            RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+            RequestQueue requestQueue = Volley.newRequestQueue(this);
             requestQueue.add(stringRequest);
-
-
         } else {
             Toast.makeText(getApplicationContext(), "Please fill all fields", Toast.LENGTH_SHORT).show();
         }
-
-
     }
 }

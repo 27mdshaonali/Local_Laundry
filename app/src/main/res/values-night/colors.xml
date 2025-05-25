@@ -26,7 +26,8 @@
     <color name="colorButtonText">#000000</color> <!-- Black on light-colored buttons -->
 
 
-
+    <color name="appBarBG">#03A9F4</color>
+    <color name="appBarItemColor">#ffffff</color>
 
 
 

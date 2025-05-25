@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+
+    <item
+        android:title="Order Status"/>
+
+
+    <item
+        android:id="@+id/allOrders"
+        android:icon="@drawable/order_history"
+        android:title="All Orders" />
+
+
+
+    <item
+        android:id="@+id/pendingOrders"
+        android:icon="@drawable/pending_orders_24"
+        android:title="Pending Orders" />
+
+    <item
+        android:id="@+id/pickedOrder"
+        android:icon="@drawable/delivered_in_time"
+        android:title="Picked Order" />
+
+
+
+
+    <item
+        android:id="@+id/offer"
+        android:icon="@drawable/offer"
+        android:title="Offer" />
+
+
+
+    <group
+        android:id="@+id/group_divider">
+
+        <item
+            android:id="@+id/support"
+            android:title="Support" />
+
+
+        <item
+            android:id="@+id/home2"
+            android:icon="@drawable/home_24"
+            android:title="Home" />
+
+        <item
+            android:id="@+id/cart2"
+            android:icon="@drawable/add_shopping_cart_24"
+            android:title="View Cart" />
+
+        <item
+            android:id="@+id/notification2"
+            android:icon="@drawable/notifications_24"
+            android:title="Notification" />
+
+        <item
+            android:id="@+id/profile2"
+            android:icon="@drawable/account_circle_24"
+            android:title="Profile" />
+
+    </group>
+
+</menu>
