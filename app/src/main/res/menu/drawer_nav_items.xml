@@ -25,14 +25,10 @@
         android:title="Picked Order" />
 
 
-
-
     <item
         android:id="@+id/offer"
         android:icon="@drawable/offer"
         android:title="Offer" />
-
-
 
     <group
         android:id="@+id/group_divider">
@@ -59,6 +55,27 @@
 
         <item
             android:id="@+id/profile2"
+            android:icon="@drawable/account_circle_24"
+            android:title="Profile" />
+
+
+        <item
+            android:id="@+id/home3"
+            android:icon="@drawable/home_24"
+            android:title="Home" />
+
+        <item
+            android:id="@+id/cart3"
+            android:icon="@drawable/add_shopping_cart_24"
+            android:title="View Cart" />
+
+        <item
+            android:id="@+id/notification3"
+            android:icon="@drawable/notifications_24"
+            android:title="Notification" />
+
+        <item
+            android:id="@+id/profile3"
             android:icon="@drawable/account_circle_24"
             android:title="Profile" />
 
