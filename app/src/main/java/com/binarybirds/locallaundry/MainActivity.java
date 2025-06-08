@@ -3,6 +3,7 @@ package com.binarybirds.locallaundry;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -24,6 +25,9 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.material.textfield.TextInputEditText;
 import com.makeramen.roundedimageview.RoundedImageView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -101,53 +105,83 @@ public class MainActivity extends AppCompatActivity {
         password = userSignInPassword.getText().toString().trim();
         boolean rememberMe = rememberMeCheckbox.isChecked();
 
-        if (!email.isEmpty() && !password.isEmpty()) {
-            StringRequest stringRequest = new StringRequest(Request.Method.POST, SIGN_IN_URL,
-                    response -> {
-                        if (response.trim().equals("success")) {
-                            sessionManager.createLoginSession(email);
 
-                            // Save credentials if rememberMe is checked
-                            if (rememberMe) {
-                                editor.putBoolean("rememberMe", true);
-                                editor.putString("email", email);
-                                editor.putString("password", password);
-                            } else {
-                                editor.clear();
-                            }
-                            editor.apply();
-
-                            Intent intent = new Intent(MainActivity.this, UserDashboard.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            intent.putExtra("email", email);
-                            startActivity(intent);
-                            finish();
-                        } else {
-                            Toast.makeText(getApplicationContext(), "Invalid email or password", Toast.LENGTH_SHORT).show();
-                        }
-                    },
-                    error -> {
-                        if (error.networkResponse != null) {
-                            Toast.makeText(getApplicationContext(), "Server Error: " + error.networkResponse.statusCode, Toast.LENGTH_LONG).show();
-                        } else {
-                            Toast.makeText(getApplicationContext(), "Network Error: " + error.toString(), Toast.LENGTH_LONG).show();
-                        }
-                    }
-            ) {
-                @Nullable
-                @Override
-                protected Map<String, String> getParams() throws AuthFailureError {
-                    Map<String, String> data = new HashMap<>();
-                    data.put("email", email);
-                    data.put("password", password);
-                    return data;
-                }
-            };
-
-            RequestQueue requestQueue = Volley.newRequestQueue(this);
-            requestQueue.add(stringRequest);
-        } else {
+        if (email.isEmpty() || password.isEmpty()) {
             Toast.makeText(getApplicationContext(), "Please fill all fields", Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, SIGN_IN_URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+                Log.d("SIGN_IN_RESPONSE", response); // For debugging
+
+                // ... inside the StringRequest onResponse lambda
+                try {
+                    JSONObject jsonObject = new JSONObject(response);
+                    String status = jsonObject.getString("status");
+
+                    if (status.equals("success")) {
+                        String userName = jsonObject.getString("name");
+                        Toast.makeText(getApplicationContext(), "Welcome " + userName, Toast.LENGTH_SHORT).show();
+
+                        // --- FIX: Use the updated SessionManager ---
+                        //sessionManager.createLoginSession(userName, email);
+                        sessionManager.createLoginSession(userName, email);
+
+                        // --- FIX: Correctly handle "Remember Me" ---
+                        // Only save the email for convenience. NEVER save the password.
+                        if (rememberMe) {
+                            editor.putBoolean("rememberMe", true);
+                            editor.putString("email", email);
+                        } else {
+                            editor.clear();
+                        }
+                        editor.apply();
+
+                        // Navigate to Dashboard. No need for extras.
+                        Intent intent = new Intent(MainActivity.this, UserDashboard.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        finish();
+
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Invalid email or password", Toast.LENGTH_SHORT).show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    Toast.makeText(getApplicationContext(), "Invalid response format", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+                Toast.makeText(getApplicationContext(), "Sign In failed"+error.toString(), Toast.LENGTH_SHORT).show();
+
+            }
+        }) {
+
+            @Nullable
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> data = new HashMap<>();
+
+                data.put("email", email);
+                data.put("password", password);
+                return data;
+
+
+            }
+        };
+
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        requestQueue.add(stringRequest);
+
+        //==================================================================================
+
+
     }
 }

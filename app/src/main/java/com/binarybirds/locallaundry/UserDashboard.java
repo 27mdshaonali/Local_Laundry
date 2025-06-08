@@ -1,17 +1,11 @@
 package com.binarybirds.locallaundry;
 
 import android.Manifest;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.util.Log;
-import android.view.MenuItem;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,6 +14,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
@@ -29,52 +24,39 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.navigation.NavigationBarView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.makeramen.roundedimageview.RoundedImageView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class UserDashboard extends AppCompatActivity {
 
-    private static final int REQUEST_GALLERY = 1;
-    private static final int REQUEST_CAMERA = 2;
-    // Declare the launcher at the top of your Activity/Fragment:
-    private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-        if (isGranted) {
-            // FCM SDK (and your app) can post notifications.
-        } else {
-            // TODO: Inform user that that your app will not show notifications.
-        }
-    });
-    RoundedImageView pickedImage, picImage;
-    TextView welcomeText, viewAllNotices;
-    SessionManager sessionManager;
-    BottomNavigationView bottomNav;
-    DrawerLayout drawerLayout;
-    AppBarLayout appBarLayout;
-    MaterialToolbar toolbar;
-    FrameLayout frameLayout;
-    NavigationView drawerNavigationView;
-    String ORDERS_URL = "https://codecanvas.top/WashWave/get_user_orders.php";
+    private static final String TAG = "UserDashboard";
+    private static final String ORDERS_URL = "https://codecanvas.top/WashWave/get_user_orders.php";
 
-    //====================== Firebase Cloud Messing Methods Code Starts Here ======================
+    // Separate launchers for each permission
+    private final ActivityResultLauncher<String> requestNotificationPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+        if (isGranted) Log.d(TAG, "Notification permission granted.");
+        else Log.d(TAG, "Notification permission denied.");
+    });
+
+    private final ActivityResultLauncher<String> requestSmsPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+        if (isGranted) Log.d(TAG, "SMS permission granted.");
+        else Log.d(TAG, "SMS permission denied.");
+    });
+
+    private TextView welcomeText;
+    private SessionManager sessionManager;
+    private DrawerLayout drawerLayout;
+    private MaterialToolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,325 +68,168 @@ public class UserDashboard extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        askNotificationPermission();
-        initFirebaseToken();
-        askSMSPermission();
-        initViews();
-    }
 
-    public void initViews() {
-//        pickedImage = findViewById(R.id.pickedImage);
-//        picImage = findViewById(R.id.picImage);
-        welcomeText = findViewById(R.id.welcome);
-//        viewAllNotices = findViewById(R.id.viewAllNotices);
-        bottomNav = findViewById(R.id.bottomNav);
-        drawerLayout = findViewById(R.id.drawerLayout);
-        appBarLayout = findViewById(R.id.appBarLayout);
-        toolbar = findViewById(R.id.toolBar);
-        frameLayout = findViewById(R.id.frameLayout);
-        drawerNavigationView = findViewById(R.id.drawerNavigationView);
-
-
-        SharedPreferences preferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
-        boolean rememberMe = preferences.getBoolean("rememberMe", false);
-        String email = preferences.getString("email", null);
-
-        // Initialize SessionManager
+        // Initialize SessionManager first
         sessionManager = new SessionManager(getApplicationContext());
 
-
-        if (rememberMe && email != null) {
-            sessionManager.isLoggedIn();
-            getUserPreferences(email);
+        // --- CRITICAL SESSION CHECK ---
+        // If the user is not logged in, redirect them immediately and stop executing this activity.
+        if (!sessionManager.isLoggedIn()) {
+            redirectToLogin();
+            return;
         }
 
-//        if (rememberMe && email != null && sessionManager.isLoggedIn()) {
-//            // Auto-login successful, show email or fetch data
-//            welcomeText.setText("Welcome, " + email);
-//            getUserPreferences(email);  // Load user data from server
-//        }
-
-        /*
-        else {
-            // Not remembered or session expired, redirect to login screen
-            Toast.makeText(this, "Please log in again", Toast.LENGTH_SHORT).show();
-            sessionManager.logout(); // Clear session
-            Intent intent = new Intent(UserDashboard.this, MainActivity.class);
-            startActivity(intent);
-            finish();
-        }
-
-         */
-
-
-        bottomNav.getOrCreateBadge(R.id.notification).setNumber(9);
-
-
-        bottomNav.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@androidx.annotation.NonNull MenuItem item) {
-                if (item.getItemId() == R.id.home) {
-
-
-                    startActivity(new Intent(UserDashboard.this, UserDashboard.class));
-
-                } else if (item.getItemId() == R.id.cart) {
-
-                    Toast.makeText(UserDashboard.this, "Cart", Toast.LENGTH_SHORT).show();
-
-                } else if (item.getItemId() == R.id.notification) {
-
-                    bottomNav.removeBadge(R.id.notification);
-                    Toast.makeText(UserDashboard.this, "Notification", Toast.LENGTH_SHORT).show();
-
-                } else if (item.getItemId() == R.id.profile) {
-
-                    Toast.makeText(UserDashboard.this, "Profile", Toast.LENGTH_SHORT).show();
-
-                }
-
-
-                return true;
-            }
-        });
-
-
-
-/*
-        welcomeText.setOnClickListener(v -> {
-            sessionManager.logout();
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.clear();  // Clear Remember Me preferences
-            editor.apply();
-
-            startActivity(new Intent(this, MainActivity.class));
-            finish();
-        });
-
- */
-
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close);
-        drawerLayout.addDrawerListener(toggle);
-
-        welcomeText.setOnClickListener(v -> {
-
-            startActivity(new Intent(this, Home.class));
-
-
-        });
-
-        drawerNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@androidx.annotation.NonNull MenuItem item) {
-
-                if (item.getItemId() == R.id.allOrders) {
-
-                    Toast.makeText(UserDashboard.this, "All Orders", Toast.LENGTH_SHORT).show();
-
-                } else if (item.getItemId() == R.id.pendingOrders) {
-                    Toast.makeText(UserDashboard.this, "Pending Orders", Toast.LENGTH_SHORT).show();
-                } else if (item.getItemId() == R.id.pickedOrder) {
-
-                    Toast.makeText(UserDashboard.this, "Picked Orders", Toast.LENGTH_SHORT).show();
-
-                } else if (item.getItemId() == R.id.offer) {
-                    Toast.makeText(UserDashboard.this, "Offer", Toast.LENGTH_SHORT).show();
-                }
-
-                return true;
-            }
-        });
-
+        // Methods to set up the UI and functionality
+        initializeViews();
+        loadUserData();
+        setupNavigation();
+        setupFirebaseAndPermissions();
     }
 
-    public void getUserPreferences(String email) {
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, ORDERS_URL, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
+    private void initializeViews() {
+        welcomeText = findViewById(R.id.welcome);
+        drawerLayout = findViewById(R.id.drawerLayout);
+        toolbar = findViewById(R.id.toolBar);
 
-                try {
-                    JSONArray jsonArray = new JSONArray(response);
-                    //result.setText("");  // Clear previous results
+        setSupportActionBar(toolbar);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+    }
 
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        JSONObject order = jsonArray.getJSONObject(i);
+    private void loadUserData() {
+        // --- Get user data ONLY from SessionManager ---
+        HashMap<String, String> userDetails = sessionManager.getUserDetails();
+        String name = userDetails.get(SessionManager.KEY_NAME);
+        String email = userDetails.get(SessionManager.KEY_EMAIL);
 
-                        String itemName = order.getString("item_name");
-                        int id = order.getInt("id");
-                        int totalPrice = order.getInt("total_price");
-                        int quantity = order.getInt("quantity");
-                        String status = order.getString("status");
+        if (name != null) {
+            welcomeText.setText("Welcome, " + name);
+        } else {
+            welcomeText.setText("Welcome!"); // Fallback
+        }
 
-                        Toast.makeText(getApplicationContext(), "item name: " + itemName, Toast.LENGTH_SHORT).show();
+        if (email != null) {
+            fetchUserOrders(email);
+        } else {
+            Log.e(TAG, "Email not found in session. Cannot fetch orders.");
+        }
+    }
 
+    private void setupNavigation() {
+        BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
+        NavigationView drawerNavigationView = findViewById(R.id.drawerNavigationView);
 
-                    }
+        bottomNav.getOrCreateBadge(R.id.notification).setNumber(9); // Example badge
 
+        bottomNav.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+            if (itemId == R.id.home) {
+                Toast.makeText(UserDashboard.this, "Home", Toast.LENGTH_SHORT).show();
+            } else if (itemId == R.id.cart) {
+                Toast.makeText(UserDashboard.this, "Cart", Toast.LENGTH_SHORT).show();
+            } else if (itemId == R.id.notification) {
+                bottomNav.removeBadge(R.id.notification);
+                Toast.makeText(UserDashboard.this, "Notification", Toast.LENGTH_SHORT).show();
+            } else if (itemId == R.id.profile) {
+                Toast.makeText(UserDashboard.this, "Profile", Toast.LENGTH_SHORT).show();
+            }
+            return true;
+        });
 
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    Toast.makeText(UserDashboard.this, "Error parsing Order Data JSon: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        drawerNavigationView.setNavigationItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+            if (itemId == R.id.logout) { // Assumes you have android:id="@+id/logout" in your menu xml
+                logoutUser();
+            } else {
+                Toast.makeText(UserDashboard.this, item.getTitle(), Toast.LENGTH_SHORT).show();
+            }
+            drawerLayout.closeDrawers();
+            return true;
+        });
+    }
+
+    private void setupFirebaseAndPermissions() {
+        askNotificationPermission();
+        askSmsPermission();
+        initFirebaseToken();
+    }
+
+    private void fetchUserOrders(String email) {
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, ORDERS_URL, response -> {
+            Log.d(TAG, "Orders Response: " + response);
+            try {
+                JSONArray jsonArray = new JSONArray(response);
+                // TODO: Populate a RecyclerView with the orders instead of showing multiple toasts.
+                if (jsonArray.length() > 0) {
+                    Toast.makeText(this, jsonArray.length() + " order(s) found.", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "No orders found.", Toast.LENGTH_SHORT).show();
                 }
-
+            } catch (JSONException e) {
+                Log.e(TAG, "JSON Parsing Error: " + e.getMessage());
             }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-                error.printStackTrace();
-                Toast.makeText(getApplicationContext(), "Error parsing order data", Toast.LENGTH_SHORT).show();
-
-            }
+        }, error -> {
+            Log.e(TAG, "Volley Error: " + error.toString());
+            Toast.makeText(this, "Error fetching orders.", Toast.LENGTH_SHORT).show();
         }) {
-
-
             @Nullable
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
-                params.put("email", email); // Use the actual logged-in email
+                params.put("email", email);
                 return params;
             }
-
-
         };
-
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        requestQueue.add(stringRequest);
-
+        Volley.newRequestQueue(this).add(stringRequest);
     }
 
-/*
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data, @androidx.annotation.NonNull ComponentCaller caller) {
-        super.onActivityResult(requestCode, resultCode, data, caller);
-
-        if (resultCode == RESULT_OK && data != null) {
-            Bitmap bitmap = null;
-
-            try {
-                if (requestCode == REQUEST_GALLERY) {
-                    Uri selectedImage = data.getData();
-                    bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImage);
-                    pickedImage.setImageBitmap(bitmap);
-                } else if (requestCode == REQUEST_CAMERA) {
-                    bitmap = (Bitmap) data.getExtras().get("data");
-                    pickedImage.setImageBitmap(bitmap);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                Toast.makeText(this, "Error loading image", Toast.LENGTH_SHORT).show();
-            }
-
-            if (bitmap != null) {
-                pickedImage.setImageBitmap(bitmap);
-
-            }
-
-
-        }
-
-
+    private void logoutUser() {
+        sessionManager.logout();
+        redirectToLogin();
     }
 
-
- */
+    private void redirectToLogin() {
+        Intent intent = new Intent(UserDashboard.this, MainActivity.class);
+        // Clear all previous activities from the stack
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish(); // Finish the dashboard activity
+    }
 
     public void initFirebaseToken() {
-
-        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
-            @Override
-            public void onComplete(@NonNull Task<String> task) {
-                if (!task.isSuccessful()) {
-                    Log.w("firebaseToken", "Fetching FCM registration token failed", task.getException());
-                    return;
-                }
-
-                // Get new FCM registration token
-                String token = task.getResult();
-                Log.d("firebaseToken", token);
-                //Toast.makeText(UserDashboard.this, token, Toast.LENGTH_SHORT).show();
-
-
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                Log.w(TAG, "Fetching FCM registration token failed", task.getException());
+                return;
             }
+            String token = task.getResult();
+            Log.d(TAG, "FCM Token: " + token);
+            // You can send this token to your server here if needed
         });
-
     }
-
-
-    //============================= Firebase Cloud Messaging Starts Here =============================
 
     private void askNotificationPermission() {
         // This is only necessary for API level >= 33 (TIRAMISU)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-                // FCM SDK (and your app) can post notifications.
-            } else if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
-                // TODO: display an educational UI explaining to the user the features that will be enabled
-                //       by them granting the POST_NOTIFICATION permission. This UI should provide the user
-                //       "OK" and "No thanks" buttons. If the user selects "OK," directly request the permission.
-                //       If the user selects "No thanks," allow the user to continue without notifications.
-
-                new AlertDialog.Builder(this).setTitle("Notification Permission").setMessage("This Permission is necessary to make the app more Personalize!").setPositiveButton("Okay", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-
-                        requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
-
-                    }
-                }).setNegativeButton("No Thanks", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        //dialogInterface.dismiss();
-                    }
-                }).create().show();
-
-
-            } else {
-                // Directly ask for the permission
-                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                // You can show a rationale dialog here if needed before launching
+                requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
             }
         }
     }
 
-    //================================ Firebase Cloud Messaging Methods Code Ends Here ======================
-
-
-    //================================ Firebase Send Sms Remotely Methods Code Starts Here ======================
-
-    private void askSMSPermission() {
-        // This is only necessary for API level >= 7 (TIRAMISU)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED) {
-                // FCM SDK (and your app) can post notifications.
-            } else if (shouldShowRequestPermissionRationale(Manifest.permission.SEND_SMS)) {
-                // TODO: display an educational UI explaining to the user the features that will be enabled
-                //       by them granting the POST_NOTIFICATION permission. This UI should provide the user
-                //       "OK" and "No thanks" buttons. If the user selects "OK," directly request the permission.
-                //       If the user selects "No thanks," allow the user to continue without notifications.
-
-                new AlertDialog.Builder(this).setTitle("Notification Permission").setMessage("This Permission is necessary to make the app more Personalize!").setPositiveButton("Okay", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-
-                        requestPermissionLauncher.launch(Manifest.permission.SEND_SMS);
-
-                    }
-                }).setNegativeButton("No Thanks", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        //dialogInterface.dismiss();
-                    }
-                }).create().show();
-
-
-            } else {
-                // Directly ask for the permission
-                requestPermissionLauncher.launch(Manifest.permission.SEND_SMS);
+    private void askSmsPermission() {
+        // This is necessary for API level >= 23 (Marshmallow)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+                if (shouldShowRequestPermissionRationale(Manifest.permission.SEND_SMS)) {
+                    // Show a dialog explaining why you need this permission
+                    new AlertDialog.Builder(this).setTitle("SMS Permission").setMessage("This permission is needed for sending order updates via SMS.").setPositiveButton("OK", (dialog, which) -> requestSmsPermissionLauncher.launch(Manifest.permission.SEND_SMS)).setNegativeButton("Cancel", null).create().show();
+                } else {
+                    requestSmsPermissionLauncher.launch(Manifest.permission.SEND_SMS);
+                }
             }
         }
     }
-
-    //================================ Firebase Send Sms Remotely Methods Code Ends Here ======================
-
 }

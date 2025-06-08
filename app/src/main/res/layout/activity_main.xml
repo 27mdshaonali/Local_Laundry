@@ -185,7 +185,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/_24sdp"
-                    android:background="@drawable/bottom_curved"
+                    android:background="@drawable/orange_button"
                     android:text="Sign in"
                     android:textAllCaps="false"
                     android:textColor="@color/btn_text"

@@ -81,4 +81,9 @@
 
     </group>
 
+    <item
+        android:id="@+id/logout"
+        android:icon="@android:drawable/ic_menu_revert"
+        android:title="Logout" />
+
 </menu>
